@@ -2,8 +2,6 @@
 import { GoogleGenAI, GenerateContentResponse, Type } from "@google/genai";
 import { ModelType } from "./types";
 
-const API_KEY = process.env.API_KEY || "";
-
 // تعريف الأدوات المتقدمة لمحاكاة التحكم الشامل في الهاتف
 const systemTools = [
   {
@@ -52,7 +50,8 @@ export const generateAIResponse = async (
   modelType: ModelType,
   history: { role: 'user' | 'assistant', content: string }[]
 ): Promise<{ text: string; functionCalls?: any[]; groundingChunks?: any[] }> => {
-  const ai = new GoogleGenAI({ apiKey: API_KEY });
+  // Use process.env.API_KEY directly in the constructor as per guidelines.
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   
   const isThinker = modelType === ModelType.THINKER;
   
