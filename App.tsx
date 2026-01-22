@@ -133,7 +133,6 @@ const App: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const recognitionRef = useRef<any>(null);
 
-  // تحديث العبارات لتكون أكثر إنسانية وبدون رموز تعبيرية حسب الطلب
   const phrases = [
     "أنا هنا لأجلك.. كيف أجعلك تبتسم اليوم؟",
     "Goyln AI: قلبٌ نابض في عالم الأرقام.",
@@ -248,20 +247,20 @@ const App: React.FC = () => {
     <div className={`flex h-screen w-full overflow-hidden transition-all duration-700 ease-in-out ${isDarkMode ? 'bg-[#000000] text-white' : 'bg-white text-zinc-900'}`}>
       
       <header className="fixed top-4 left-0 right-0 flex items-center justify-between px-6 z-40 pointer-events-none">
-        <button onClick={() => setIsSidebarOpen(true)} className={`p-2.5 rounded-2xl transition-all pointer-events-auto shadow-sm glass-input border border-transparent ${isDarkMode ? 'hover:bg-white/10 text-white/40 hover:text-white' : 'hover:bg-zinc-100 text-zinc-400 hover:text-black'}`}>
-          <Menu size={22} strokeWidth={2} />
+        <button onClick={() => setIsSidebarOpen(true)} className={`p-2 rounded-2xl transition-all pointer-events-auto shadow-sm glass-input border border-transparent ${isDarkMode ? 'hover:bg-white/10 text-white/40 hover:text-white' : 'hover:bg-zinc-100 text-zinc-400 hover:text-black'}`}>
+          <Menu size={20} strokeWidth={2} />
         </button>
 
         <div className="relative pointer-events-auto">
-          <button onClick={() => setIsAccountMenuOpen(!isAccountMenuOpen)} className={`p-2.5 rounded-2xl transition-all pointer-events-auto shadow-sm glass-input border border-transparent ${isDarkMode ? 'hover:bg-white/10 text-white/30 hover:text-white' : 'hover:bg-zinc-100 text-zinc-300 hover:text-black'} ${isAccountMenuOpen ? 'rotate-180 text-black dark:text-white scale-110' : ''}`}>
-            <ArrowLeft size={20} strokeWidth={2.5} />
+          <button onClick={() => setIsAccountMenuOpen(!isAccountMenuOpen)} className={`p-2 rounded-2xl transition-all pointer-events-auto shadow-sm glass-input border border-transparent ${isDarkMode ? 'hover:bg-white/10 text-white/30 hover:text-white' : 'hover:bg-zinc-100 text-zinc-300 hover:text-black'} ${isAccountMenuOpen ? 'rotate-180 text-black dark:text-white scale-110' : ''}`}>
+            <ArrowLeft size={18} strokeWidth={2.5} />
           </button>
           <div className={`absolute top-full left-0 mt-4 flex flex-col gap-4 p-1 transition-all duration-500 origin-top-left z-50 ${isAccountMenuOpen ? 'scale-100 opacity-100 translate-y-0' : 'scale-90 opacity-0 -translate-y-5 pointer-events-none'}`}>
-            <button onClick={() => { setIsLoginOpen(true); setIsAccountMenuOpen(false); }} className={`w-12 h-12 flex items-center justify-center glass-input border rounded-full shadow-2xl transition-all hover:scale-110 active:scale-95 ${isDarkMode ? 'bg-zinc-800/90 border-zinc-700/50 text-white' : 'bg-white/95 border-zinc-200 text-black'}`}>
-              <User size={20} strokeWidth={2} />
+            <button onClick={() => { setIsLoginOpen(true); setIsAccountMenuOpen(false); }} className={`w-10 h-10 flex items-center justify-center glass-input border rounded-full shadow-2xl transition-all hover:scale-110 active:scale-95 ${isDarkMode ? 'bg-zinc-800/90 border-zinc-700/50 text-white' : 'bg-white/95 border-zinc-200 text-black'}`}>
+              <User size={18} strokeWidth={2} />
             </button>
-            <button className={`w-12 h-12 flex items-center justify-center glass-input border rounded-full shadow-2xl transition-all hover:scale-110 active:scale-95 ${isDarkMode ? 'bg-zinc-800/90 border-zinc-700/50 text-white' : 'bg-white/95 border-zinc-200 text-black'}`}>
-              <Sparkles size={20} strokeWidth={2} />
+            <button className={`w-10 h-10 flex items-center justify-center glass-input border rounded-full shadow-2xl transition-all hover:scale-110 active:scale-95 ${isDarkMode ? 'bg-zinc-800/90 border-zinc-700/50 text-white' : 'bg-white/95 border-zinc-200 text-black'}`}>
+              <Sparkles size={18} strokeWidth={2} />
             </button>
           </div>
         </div>
@@ -329,33 +328,33 @@ const App: React.FC = () => {
           </div>
         </div>
 
-        {/* Floating Input Area - Integrated Design - تصغير العرض حسب الطلب */}
-        <div className="absolute bottom-10 left-0 right-0 px-6 pointer-events-none">
-          <div className="max-w-xl mx-auto w-full pointer-events-auto relative">
+        {/* Floating Input Area - تم تصغير الحجم ليكون نحيفاً وأصغر حسب المخطط */}
+        <div className="absolute bottom-10 left-0 right-0 px-4 pointer-events-none">
+          <div className="max-w-lg mx-auto w-full pointer-events-auto relative">
             
             {/* File Previews */}
             {attachedFiles.length > 0 && (
-              <div className="flex flex-wrap gap-2 mb-4 p-2 glass-input rounded-2xl border border-transparent animate-in slide-in-from-bottom-2">
+              <div className="flex flex-wrap gap-2 mb-3 p-2 glass-input rounded-2xl border border-transparent animate-in slide-in-from-bottom-2">
                 {attachedFiles.map((file, i) => (
-                  <div key={i} className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-[11px] font-bold border ${isDarkMode ? 'bg-zinc-800 border-zinc-700 text-zinc-300' : 'bg-white border-zinc-100 text-zinc-600'}`}>
-                    {file.mimeType.includes('image') ? <ImageIcon size={12} /> : <FileText size={12} />}
-                    <span className="max-w-[100px] truncate">{file.name}</span>
-                    <button onClick={() => setAttachedFiles(f => f.filter((_, idx) => idx !== i))} className="hover:text-red-500"><X size={12} /></button>
+                  <div key={i} className={`flex items-center gap-2 px-2.5 py-1 rounded-xl text-[10px] font-bold border ${isDarkMode ? 'bg-zinc-800 border-zinc-700 text-zinc-300' : 'bg-white border-zinc-100 text-zinc-600'}`}>
+                    {file.mimeType.includes('image') ? <ImageIcon size={10} /> : <FileText size={10} />}
+                    <span className="max-w-[80px] truncate">{file.name}</span>
+                    <button onClick={() => setAttachedFiles(f => f.filter((_, idx) => idx !== i))} className="hover:text-red-500"><X size={10} /></button>
                   </div>
                 ))}
               </div>
             )}
 
-            <div className={`glass-input border shadow-2xl rounded-[32px] p-2 flex items-center gap-2 transition-all duration-700 focus-within:shadow-indigo-500/10 focus-within:scale-[1.015]
-              ${isDarkMode ? 'bg-zinc-950/80 border-zinc-800 focus-within:border-zinc-600' : 'bg-white/95 border-zinc-100 focus-within:border-zinc-300'}`}>
+            <div className={`glass-input border shadow-xl rounded-[28px] p-1.5 flex items-center gap-1.5 transition-all duration-700 focus-within:shadow-indigo-500/5 focus-within:scale-[1.01]
+              ${isDarkMode ? 'bg-zinc-950/80 border-zinc-800 focus-within:border-zinc-700' : 'bg-white/95 border-zinc-100 focus-within:border-zinc-200'}`}>
               
-              <div className="flex items-center gap-1 px-1">
+              <div className="flex items-center gap-0.5 pl-1">
                 <input type="file" multiple ref={fileInputRef} onChange={handleFileChange} className="hidden" />
-                <button onClick={() => fileInputRef.current?.click()} className={`p-3 transition-all rounded-full active:scale-90 ${isDarkMode ? 'text-zinc-600 hover:text-white hover:bg-white/10' : 'text-zinc-400 hover:text-black hover:bg-zinc-50'}`}>
-                  <Paperclip size={20} strokeWidth={2.5} />
+                <button onClick={() => fileInputRef.current?.click()} className={`p-2 transition-all rounded-full active:scale-90 ${isDarkMode ? 'text-zinc-600 hover:text-white hover:bg-white/5' : 'text-zinc-400 hover:text-black hover:bg-zinc-50'}`}>
+                  <Paperclip size={18} strokeWidth={2.5} />
                 </button>
-                <button onClick={toggleRecording} className={`p-3 transition-all rounded-full active:scale-90 ${isRecording ? 'bg-red-500 text-white animate-pulse' : (isDarkMode ? 'text-zinc-600 hover:text-white hover:bg-white/10' : 'text-zinc-400 hover:text-black hover:bg-zinc-50')}`}>
-                  {isRecording ? <MicOff size={20} strokeWidth={2.5} /> : <Mic size={20} strokeWidth={2.5} />}
+                <button onClick={toggleRecording} className={`p-2 transition-all rounded-full active:scale-90 ${isRecording ? 'bg-red-500 text-white animate-pulse' : (isDarkMode ? 'text-zinc-600 hover:text-white hover:bg-white/5' : 'text-zinc-400 hover:text-black hover:bg-zinc-50')}`}>
+                  {isRecording ? <MicOff size={18} strokeWidth={2.5} /> : <Mic size={18} strokeWidth={2.5} />}
                 </button>
               </div>
 
@@ -369,21 +368,21 @@ const App: React.FC = () => {
                     handleSend(); 
                   } 
                 }} 
-                placeholder="تحدث بذكاء مع Goyln..." 
-                className={`flex-1 bg-transparent py-4 px-2 text-[16px] font-semibold outline-none border-none resize-none overflow-hidden max-h-48 tracking-tight ${isDarkMode ? 'text-zinc-100 placeholder-zinc-800' : 'text-zinc-900 placeholder-zinc-400'}`} 
+                placeholder="اسأل Goyln..." 
+                className={`flex-1 bg-transparent py-2 px-1 text-[15px] font-semibold outline-none border-none resize-none overflow-hidden max-h-40 tracking-tight ${isDarkMode ? 'text-zinc-100 placeholder-zinc-800' : 'text-zinc-900 placeholder-zinc-300'}`} 
               />
 
-              <div className={`flex items-center p-1 rounded-2xl border mx-2 transition-all ${isDarkMode ? 'bg-zinc-900 border-zinc-800 shadow-inner' : 'bg-zinc-50 border-zinc-200'}`}>
-                <button onClick={() => setModelType(ModelType.FAST)} className={`px-3 py-2 rounded-xl text-[10px] font-black transition-all flex items-center gap-1.5 ${modelType === ModelType.FAST ? (isDarkMode ? 'bg-white text-black shadow-lg scale-105' : 'bg-black text-white shadow-lg scale-105') : 'text-zinc-500 hover:text-zinc-800'}`}>
-                  <Zap size={12} fill={modelType === ModelType.FAST ? "currentColor" : "none"} /> Goyln
+              <div className={`flex items-center p-0.5 rounded-2xl border mx-1 transition-all ${isDarkMode ? 'bg-zinc-900 border-zinc-800' : 'bg-zinc-50 border-zinc-200'}`}>
+                <button onClick={() => setModelType(ModelType.FAST)} className={`px-2.5 py-1.5 rounded-xl text-[9px] font-black transition-all flex items-center gap-1 ${modelType === ModelType.FAST ? (isDarkMode ? 'bg-white text-black shadow-md scale-105' : 'bg-black text-white shadow-md scale-105') : 'text-zinc-500 hover:text-zinc-800'}`}>
+                  <Zap size={10} fill={modelType === ModelType.FAST ? "currentColor" : "none"} /> Goyln
                 </button>
-                <button onClick={() => setModelType(ModelType.THINKER)} className={`px-3 py-2 rounded-xl text-[10px] font-black transition-all flex items-center gap-1.5 ${modelType === ModelType.THINKER ? (isDarkMode ? 'bg-white text-black shadow-lg scale-105' : 'bg-black text-white shadow-lg scale-105') : 'text-zinc-500 hover:text-zinc-800'}`}>
-                  <BrainCircuit size={12} /> Mind
+                <button onClick={() => setModelType(ModelType.THINKER)} className={`px-2.5 py-1.5 rounded-xl text-[9px] font-black transition-all flex items-center gap-1 ${modelType === ModelType.THINKER ? (isDarkMode ? 'bg-white text-black shadow-md scale-105' : 'bg-black text-white shadow-md scale-105') : 'text-zinc-500 hover:text-zinc-800'}`}>
+                  <BrainCircuit size={10} /> Mind
                 </button>
               </div>
 
-              <button onClick={handleSend} disabled={(!input.trim() && attachedFiles.length === 0) || isLoading} className={`p-4 rounded-[24px] transition-all flex items-center justify-center shadow-xl ${input.trim() || attachedFiles.length > 0 ? (isDarkMode ? 'bg-white text-black hover:bg-zinc-200 active:scale-95' : 'bg-black text-white hover:bg-zinc-800 active:scale-95') : (isDarkMode ? 'bg-zinc-900 text-zinc-800' : 'bg-zinc-100 text-zinc-200')}`}>
-                <Send size={22} strokeWidth={2.5} className="transform rotate-180" />
+              <button onClick={handleSend} disabled={(!input.trim() && attachedFiles.length === 0) || isLoading} className={`p-3 rounded-[20px] transition-all flex items-center justify-center shadow-lg ${input.trim() || attachedFiles.length > 0 ? (isDarkMode ? 'bg-white text-black hover:bg-zinc-200 active:scale-95' : 'bg-black text-white hover:bg-zinc-800 active:scale-95') : (isDarkMode ? 'bg-zinc-900 text-zinc-800' : 'bg-zinc-100 text-zinc-200')}`}>
+                <Send size={18} strokeWidth={2.5} className="transform rotate-180" />
               </button>
             </div>
           </div>
