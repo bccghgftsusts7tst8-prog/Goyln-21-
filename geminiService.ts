@@ -2,6 +2,8 @@
 import { GoogleGenAI, GenerateContentResponse, Type } from "@google/genai";
 import { ModelType } from "./types";
 
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
 export const generateAIResponse = async (
   prompt: string,
   modelType: ModelType,
@@ -9,10 +11,8 @@ export const generateAIResponse = async (
   location?: { latitude: number; longitude: number },
   files?: { data: string; mimeType: string }[]
 ): Promise<{ text: string; functionCalls?: any[]; groundingChunks?: any[] }> => {
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   
   const isThinker = modelType === ModelType.THINKER;
-  // Maps grounding requires 2.5 series. We use 2.5-flash for maximum tool compatibility.
   const modelName = isThinker ? 'gemini-3-pro-preview' : 'gemini-2.5-flash';
   
   const systemInstruction = `
@@ -40,7 +40,6 @@ export const generateAIResponse = async (
   `;
 
   const tools: any[] = [{ googleSearch: {} }];
-  // Maps tool is only for Gemini 2.5 series
   if (modelName.includes('2.5')) {
     tools.push({ googleMaps: {} });
   }
@@ -76,7 +75,7 @@ export const generateAIResponse = async (
     files.forEach(f => {
       userParts.push({
         inlineData: {
-          data: f.data.split(',')[1], // Remove the data:image/png;base64, part
+          data: f.data.split(',')[1],
           mimeType: f.mimeType
         }
       });
@@ -88,20 +87,46 @@ export const generateAIResponse = async (
     parts: userParts
   });
 
-  try {
-    const response: GenerateContentResponse = await ai.models.generateContent({
-      model: modelName,
-      contents,
-      config
-    });
+  const MAX_RETRIES = 3;
+  let retryCount = 0;
 
-    return {
-      text: response.text || "",
-      functionCalls: response.functionCalls,
-      groundingChunks: response.candidates?.[0]?.groundingMetadata?.groundingChunks
-    };
-  } catch (error) {
-    console.error("Goyln AI Intelligence Error:", error);
-    return { text: "أنا هنا معك.. يبدو أن هناك ضغطاً بسيطاً على حواسي الرقمية بسبب كثرة التفكير. دعنا نحاول مجدداً يا صديقي! ✨🤝" };
+  while (retryCount <= MAX_RETRIES) {
+    try {
+      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      const response: GenerateContentResponse = await ai.models.generateContent({
+        model: modelName,
+        contents,
+        config
+      });
+
+      return {
+        text: response.text || "",
+        functionCalls: response.functionCalls,
+        groundingChunks: response.candidates?.[0]?.groundingMetadata?.groundingChunks
+      };
+    } catch (error: any) {
+      const errorMsg = error?.message || "";
+      const isQuotaError = errorMsg.includes("429") || errorMsg.includes("RESOURCE_EXHAUSTED");
+      const isServerError = errorMsg.includes("500") || errorMsg.includes("503");
+
+      if ((isQuotaError || isServerError) && retryCount < MAX_RETRIES) {
+        retryCount++;
+        // تأخير متزايد: 2 ثانية، ثم 4، ثم 8
+        const delay = Math.pow(2, retryCount) * 1000;
+        console.warn(`Goyln AI: Retrying in ${delay}ms... (Attempt ${retryCount}/${MAX_RETRIES})`);
+        await sleep(delay);
+        continue;
+      }
+
+      console.error("Goyln AI Intelligence Error:", error);
+      
+      if (isQuotaError) {
+        return { text: "عذراً يا صديقي، يبدو أن عقلي الرقمي يحتاج لراحة قصيرة جداً (تجاوز حد الطلبات). سأكون جاهزاً تماماً خلال ثوانٍ بسيطة، جرب إرسال رسالتك مرة أخرى! ✨⏳" };
+      }
+      
+      return { text: "أنا هنا معك.. يبدو أن هناك ضغطاً بسيطاً على حواسي الرقمية بسبب كثرة التفكير. دعنا نحاول مجدداً يا صديقي! ✨🤝" };
+    }
   }
+
+  return { text: "أنا آسف حقاً، يبدو أنني أواجه صعوبة في الاتصال حالياً. دعنا نتنفس قليلاً ونحاول مرة أخرى لاحقاً." };
 };

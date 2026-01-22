@@ -37,6 +37,46 @@ import {
 import { Message, ModelType } from './types';
 import { generateAIResponse } from './geminiService';
 
+const formatContent = (content: string, isUser: boolean) => {
+  if (isUser) return content;
+
+  // بسيط جداً: تمييز الأسطر التي تبدأ بـ # أو النصوص بين **
+  const lines = content.split('\n');
+  return lines.map((line, idx) => {
+    let processedLine = line;
+    
+    // معالجة النصوص العريضة **text**
+    const boldRegex = /\*\*(.*?)\*\*/g;
+    const parts = [];
+    let lastIndex = 0;
+    let match;
+    
+    while ((match = boldRegex.exec(processedLine)) !== null) {
+      if (match.index > lastIndex) {
+        parts.push(processedLine.substring(lastIndex, match.index));
+      }
+      parts.push(<strong key={`${idx}-${match.index}`} className="font-bold text-black dark:text-white">{match[1]}</strong>);
+      lastIndex = boldRegex.lastIndex;
+    }
+    
+    if (lastIndex < processedLine.length) {
+      parts.push(processedLine.substring(lastIndex));
+    }
+
+    const finalContent = parts.length > 0 ? parts : processedLine;
+
+    if (line.startsWith('###')) {
+      return <h3 key={idx} className="text-lg font-title font-bold mt-4 mb-2">{line.replace('###', '').trim()}</h3>;
+    } else if (line.startsWith('##')) {
+      return <h2 key={idx} className="text-xl font-title font-bold mt-5 mb-3">{line.replace('##', '').trim()}</h2>;
+    } else if (line.startsWith('#')) {
+      return <h1 key={idx} className="text-2xl font-title font-black mt-6 mb-4">{line.replace('#', '').trim()}</h1>;
+    }
+    
+    return <p key={idx} className="mb-2 last:mb-0 leading-relaxed">{finalContent}</p>;
+  });
+};
+
 const SidebarAction: React.FC<{ 
   icon: React.ReactNode; 
   label: string; 
@@ -54,7 +94,7 @@ const SidebarAction: React.FC<{
     <span className={`${variant === 'default' ? 'text-zinc-400 group-hover:text-black dark:group-hover:text-white' : 'text-zinc-400'} transition-colors`}>
       {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement<any>, { size: 16, strokeWidth: 1.5 }) : icon}
     </span>
-    <span className="font-medium">{label}</span>
+    <span className="font-medium font-title">{label}</span>
   </button>
 );
 
@@ -75,11 +115,11 @@ const MessageItem: React.FC<{ message: Message; isDarkMode: boolean }> = ({ mess
         </div>
 
         <div className={`flex flex-col ${isUser ? 'items-end' : 'items-start'} flex-1 overflow-hidden`}>
-          <div className={`p-4 rounded-3xl max-w-[92%] transition-all leading-[1.8] whitespace-pre-wrap
+          <div className={`p-4 rounded-3xl max-w-[92%] transition-all whitespace-pre-wrap
             ${isUser 
               ? `font-user text-[14.5px] ${isDarkMode ? 'bg-zinc-900/50 text-zinc-200' : 'bg-zinc-50 text-zinc-700'}` 
-              : `font-assistant text-[15.5px] ${isDarkMode ? 'text-white' : 'text-zinc-900'}`}`}>
-            {message.content}
+              : `font-assistant text-[15.5px] ai-content ${isDarkMode ? 'text-zinc-300' : 'text-zinc-800'}`}`}>
+            {formatContent(message.content, isUser)}
           </div>
           
           {groundingLinks && groundingLinks.length > 0 && (
@@ -93,7 +133,7 @@ const MessageItem: React.FC<{ message: Message; isDarkMode: boolean }> = ({ mess
                   className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-[10px] font-bold border transition-all hover:scale-105 active:scale-95 ${isDarkMode ? 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-white' : 'bg-white border-zinc-200 text-zinc-500 hover:text-black shadow-sm'}`}
                 >
                   {link.uri.includes('google.com/maps') ? <MapPin size={10} className="text-red-500" /> : <Globe size={10} />}
-                  <span className="truncate max-w-[120px]">{link.title || 'عرض المصدر'}</span>
+                  <span className="truncate max-w-[120px] font-title">{link.title || 'عرض المصدر'}</span>
                   <ExternalLink size={9} />
                 </a>
               ))}
@@ -103,7 +143,7 @@ const MessageItem: React.FC<{ message: Message; isDarkMode: boolean }> = ({ mess
           {!isUser && (
             <div className={`flex items-center gap-2 mt-4 opacity-0 group-hover:opacity-40 transition-all duration-500`}>
               <div className={`h-[1px] w-6 ${isDarkMode ? 'bg-white' : 'bg-black'}`}></div>
-              <span className="text-[8px] font-black uppercase tracking-[0.2em] flex items-center gap-1.5">
+              <span className="text-[8px] font-black uppercase tracking-[0.2em] flex items-center gap-1.5 font-title">
                 <Cpu size={10} />
                 {message.model === ModelType.THINKER ? 'Goyln Mind' : 'Goyln Fast'}
               </span>
@@ -272,8 +312,8 @@ const App: React.FC = () => {
           <div className="pt-8 px-6 pb-4">
             <div className="flex items-center justify-between mb-8">
               <div className="flex flex-col items-end">
-                <span className={`text-[9px] font-black uppercase tracking-[0.4em] ${isDarkMode ? 'text-zinc-700' : 'text-zinc-300'}`}>GOYLN</span>
-                <span className={`text-[11px] font-black uppercase tracking-[0.2em] -mt-1 ${isDarkMode ? 'text-zinc-500' : 'text-zinc-400'}`}>INTELLIGENCE</span>
+                <span className={`text-[9px] font-black uppercase tracking-[0.4em] font-title ${isDarkMode ? 'text-zinc-700' : 'text-zinc-300'}`}>GOYLN</span>
+                <span className={`text-[11px] font-black uppercase tracking-[0.2em] -mt-1 font-title ${isDarkMode ? 'text-zinc-500' : 'text-zinc-400'}`}>INTELLIGENCE</span>
               </div>
               <button onClick={() => setIsSidebarOpen(false)} className={`p-1.5 rounded-xl transition-all ${isDarkMode ? 'hover:bg-white/5 text-zinc-500' : 'hover:bg-zinc-50 text-zinc-400'}`}>
                 <ChevronRight size={20} strokeWidth={2} />
@@ -281,7 +321,7 @@ const App: React.FC = () => {
             </div>
             <div className="relative group mb-4">
               <Search className={`absolute right-3.5 top-1/2 -translate-y-1/2 transition-colors ${isDarkMode ? 'text-zinc-700' : 'text-zinc-300'}`} size={14} />
-              <input type="text" placeholder="ابحث في سجل Goyln..." className={`w-full pr-10 pl-3 py-3 rounded-2xl text-[12px] font-bold outline-none border transition-all ${isDarkMode ? 'bg-zinc-900/40 text-white border-zinc-800 focus:border-zinc-700' : 'bg-zinc-50/50 text-zinc-900 border-zinc-100 focus:border-zinc-200'}`} />
+              <input type="text" placeholder="ابحث في سجل Goyln..." className={`w-full pr-10 pl-3 py-3 rounded-2xl text-[12px] font-bold outline-none border transition-all font-title ${isDarkMode ? 'bg-zinc-900/40 text-white border-zinc-800 focus:border-zinc-700' : 'bg-zinc-50/50 text-zinc-900 border-zinc-100 focus:border-zinc-200'}`} />
             </div>
           </div>
           
@@ -300,8 +340,8 @@ const App: React.FC = () => {
           <div className="p-4 pb-8">
             <div className={`p-4 rounded-[24px] flex flex-row items-center justify-between cursor-pointer transition-all active:scale-95 border border-transparent ${isDarkMode ? 'bg-zinc-900/40 hover:border-zinc-800' : 'bg-zinc-50 hover:border-zinc-100'}`}>
               <div className="flex-1 min-w-0 text-right pr-3">
-                <p className={`font-black text-[13px] truncate ${isDarkMode ? 'text-zinc-100' : 'text-zinc-900'}`}>حسابك في Goyln</p>
-                <p className={`text-[9px] truncate font-black uppercase tracking-[0.05em] opacity-40 ${isDarkMode ? 'text-zinc-500' : 'text-zinc-400'}`}>PREMIUM ACCESS</p>
+                <p className={`font-black text-[13px] truncate font-title ${isDarkMode ? 'text-zinc-100' : 'text-zinc-900'}`}>حسابك في Goyln</p>
+                <p className={`text-[9px] truncate font-black uppercase tracking-[0.05em] opacity-40 font-title ${isDarkMode ? 'text-zinc-500' : 'text-zinc-400'}`}>PREMIUM ACCESS</p>
               </div>
               <div className={`w-10 h-10 rounded-2xl flex items-center justify-center shadow-lg font-black text-sm shrink-0 ${isDarkMode ? 'bg-white text-black' : 'bg-black text-white'}`}>G</div>
             </div>
@@ -315,7 +355,7 @@ const App: React.FC = () => {
             {messages.length === 0 ? (
               <div className="flex-1 flex flex-col items-center justify-center py-20 animate-in fade-in duration-1000">
                 <div className="relative h-32 w-full flex items-center justify-center mb-6">
-                  <h2 key={phraseIndex} className={`text-2xl md:text-3xl font-black transition-all duration-1000 animate-slide-up text-center px-8 tracking-tighter leading-tight ${isDarkMode ? 'text-zinc-500' : 'text-zinc-500'}`}>
+                  <h2 key={phraseIndex} className={`text-2xl md:text-3xl font-black transition-all duration-1000 animate-slide-up text-center px-8 tracking-tighter leading-tight font-title ${isDarkMode ? 'text-zinc-500' : 'text-zinc-500'}`}>
                     {phrases[phraseIndex]}
                   </h2>
                 </div>
@@ -336,7 +376,7 @@ const App: React.FC = () => {
           </div>
         </div>
 
-        {/* Floating Input Area - تصغير الحجم وتنظيمه */}
+        {/* Floating Input Area */}
         <div className="absolute bottom-10 left-0 right-0 px-4 pointer-events-none">
           <div className="max-w-lg mx-auto w-full pointer-events-auto relative">
             
@@ -346,7 +386,7 @@ const App: React.FC = () => {
                 {attachedFiles.map((file, i) => (
                   <div key={i} className={`flex items-center gap-2 px-2.5 py-1 rounded-xl text-[10px] font-bold border ${isDarkMode ? 'bg-zinc-800 border-zinc-700 text-zinc-300' : 'bg-white border-zinc-100 text-zinc-600'}`}>
                     {file.mimeType.includes('image') ? <ImageIcon size={10} /> : <FileText size={10} />}
-                    <span className="max-w-[80px] truncate">{file.name}</span>
+                    <span className="max-w-[80px] truncate font-title">{file.name}</span>
                     <button onClick={() => setAttachedFiles(f => f.filter((_, idx) => idx !== i))} className="hover:text-red-500"><X size={10} /></button>
                   </div>
                 ))}
@@ -377,14 +417,14 @@ const App: React.FC = () => {
                   } 
                 }} 
                 placeholder="اسأل Goyln..." 
-                className={`flex-1 bg-transparent py-2 px-1 text-[15px] font-semibold outline-none border-none resize-none overflow-hidden max-h-40 tracking-tight ${isDarkMode ? 'text-zinc-100 placeholder-zinc-800' : 'text-zinc-900 placeholder-zinc-300'}`} 
+                className={`flex-1 bg-transparent py-2 px-1 text-[15px] font-semibold font-title outline-none border-none resize-none overflow-hidden max-h-40 tracking-tight ${isDarkMode ? 'text-zinc-100 placeholder-zinc-800' : 'text-zinc-900 placeholder-zinc-300'}`} 
               />
 
               <div className={`flex items-center p-0.5 rounded-2xl border mx-1 transition-all ${isDarkMode ? 'bg-zinc-900 border-zinc-800' : 'bg-zinc-50 border-zinc-200'}`}>
-                <button onClick={() => setModelType(ModelType.FAST)} className={`px-2.5 py-1.5 rounded-xl text-[9px] font-black transition-all flex items-center gap-1 ${modelType === ModelType.FAST ? (isDarkMode ? 'bg-white text-black shadow-md scale-105' : 'bg-black text-white shadow-md scale-105') : 'text-zinc-500 hover:text-zinc-800'}`}>
+                <button onClick={() => setModelType(ModelType.FAST)} className={`px-2.5 py-1.5 rounded-xl text-[9px] font-black font-title transition-all flex items-center gap-1 ${modelType === ModelType.FAST ? (isDarkMode ? 'bg-white text-black shadow-md scale-105' : 'bg-black text-white shadow-md scale-105') : 'text-zinc-500 hover:text-zinc-800'}`}>
                   <Zap size={10} fill={modelType === ModelType.FAST ? "currentColor" : "none"} /> Goyln
                 </button>
-                <button onClick={() => setModelType(ModelType.THINKER)} className={`px-2.5 py-1.5 rounded-xl text-[9px] font-black transition-all flex items-center gap-1 ${modelType === ModelType.THINKER ? (isDarkMode ? 'bg-white text-black shadow-md scale-105' : 'bg-black text-white shadow-md scale-105') : 'text-zinc-500 hover:text-zinc-800'}`}>
+                <button onClick={() => setModelType(ModelType.THINKER)} className={`px-2.5 py-1.5 rounded-xl text-[9px] font-black font-title transition-all flex items-center gap-1 ${modelType === ModelType.THINKER ? (isDarkMode ? 'bg-white text-black shadow-md scale-105' : 'bg-black text-white shadow-md scale-105') : 'text-zinc-500 hover:text-zinc-800'}`}>
                   <BrainCircuit size={10} /> Mind
                 </button>
               </div>
@@ -404,11 +444,11 @@ const App: React.FC = () => {
               <X size={24} strokeWidth={2.5} />
             </button>
             <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-10 shadow-2xl font-black text-3xl ${isDarkMode ? 'bg-white text-black' : 'bg-black text-white'}`}>G</div>
-            <h3 className={`text-2xl font-black mb-3 tracking-tighter ${isDarkMode ? 'text-white' : 'text-zinc-900'}`}>Goyln Account</h3>
-            <p className={`text-[13px] mb-10 font-bold ${isDarkMode ? 'text-zinc-600' : 'text-zinc-400'}`}>مستقبلك في Goyln يبدأ الآن.</p>
+            <h3 className={`text-2xl font-black mb-3 tracking-tighter font-title ${isDarkMode ? 'text-white' : 'text-zinc-900'}`}>Goyln Account</h3>
+            <p className={`text-[13px] mb-10 font-bold font-title ${isDarkMode ? 'text-zinc-600' : 'text-zinc-400'}`}>مستقبلك في Goyln يبدأ الآن.</p>
             <div className="space-y-3">
-              <button className={`w-full py-4 px-8 border rounded-2xl flex items-center justify-center gap-3 font-black text-[13px] transition-all hover:scale-[1.02] active:scale-95 ${isDarkMode ? 'bg-zinc-900 border-zinc-800 text-white hover:bg-zinc-800' : 'bg-white border-zinc-200 text-zinc-900 hover:bg-zinc-50 shadow-sm'}`}>عبر جوجل</button>
-              <button className={`w-full py-4 px-8 rounded-2xl font-black text-[13px] transition-all hover:scale-[1.02] active:scale-95 shadow-xl ${isDarkMode ? 'bg-white text-black hover:bg-zinc-200' : 'bg-black text-white hover:bg-zinc-800'}`}>البريد الإلكتروني</button>
+              <button className={`w-full py-4 px-8 border rounded-2xl flex items-center justify-center gap-3 font-black text-[13px] font-title transition-all hover:scale-[1.02] active:scale-95 ${isDarkMode ? 'bg-zinc-900 border-zinc-800 text-white hover:bg-zinc-800' : 'bg-white border-zinc-200 text-zinc-900 hover:bg-zinc-50 shadow-sm'}`}>عبر جوجل</button>
+              <button className={`w-full py-4 px-8 rounded-2xl font-black text-[13px] font-title transition-all hover:scale-[1.02] active:scale-95 shadow-xl ${isDarkMode ? 'bg-white text-black hover:bg-zinc-200' : 'bg-black text-white hover:bg-zinc-800'}`}>البريد الإلكتروني</button>
             </div>
           </div>
         </div>
