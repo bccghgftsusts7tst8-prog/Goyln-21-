@@ -18,7 +18,11 @@ import {
   MessageSquare,
   History,
   ChevronRight,
-  Settings
+  ChevronLeft,
+  Settings,
+  Headphones,
+  Sparkles,
+  ArrowLeft
 } from 'lucide-react';
 import { Message, ModelType } from './types';
 import { generateAIResponse } from './geminiService';
@@ -53,7 +57,7 @@ const MessageItem: React.FC<{ message: Message }> = ({ message }) => {
           {isUser ? <User size={14} strokeWidth={2.5} /> : <div className="font-black text-[10px]">G</div>}
         </div>
         <div className={`flex flex-col ${isUser ? 'items-end' : 'items-start'}`}>
-          <div className={`px-4 py-2.5 rounded-[20px] text-[14.5px] leading-relaxed border
+          <div className={`px-4 py-2.5 rounded-[20px] text-[14.5px] font-medium leading-relaxed border
             ${isUser 
               ? 'bg-white border-gray-100 text-gray-800 rounded-tr-none' 
               : 'bg-gray-50 border-gray-50 text-gray-900 rounded-tl-none'}`}>
@@ -70,11 +74,28 @@ const App: React.FC = () => {
   const [input, setInput] = useState('');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
   const [modelType, setModelType] = useState<ModelType>(ModelType.FAST);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [phraseIndex, setPhraseIndex] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const phrases = [
+    "كيف يمكنني مساعدتك اليوم؟",
+    "ماذا يدور في ذهنك؟",
+    "أنا هنا للإجابة على تساؤلاتك.",
+    "هل نبدأ محادثة جديدة؟",
+    "Goyln في خدمتك دائمًا."
+  ];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setPhraseIndex((prev) => (prev + 1) % phrases.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -127,13 +148,40 @@ const App: React.FC = () => {
           <Menu size={22} strokeWidth={2} />
         </button>
 
-        {/* اليسار: أيقونة تسجيل الدخول الشفافة */}
-        <button 
-          onClick={() => setIsLoginOpen(true)}
-          className="p-2.5 rounded-full hover:bg-gray-100/50 transition-all opacity-40 hover:opacity-100 pointer-events-auto"
-        >
-          <User size={20} strokeWidth={1.5} />
-        </button>
+        {/* اليسار: سهم يفتح قائمة الخيارات */}
+        <div className="relative pointer-events-auto">
+          <button 
+            onClick={() => setIsAccountMenuOpen(!isAccountMenuOpen)}
+            className={`p-2.5 rounded-full hover:bg-gray-100/50 transition-all opacity-40 hover:opacity-100 ${isAccountMenuOpen ? 'rotate-180 opacity-100' : ''}`}
+          >
+            <ArrowLeft size={20} strokeWidth={2} />
+          </button>
+
+          {/* القائمة المنسدلة من السهم */}
+          <div className={`absolute top-full left-0 mt-2 w-56 bg-white/90 backdrop-blur-xl border border-gray-100 rounded-[24px] shadow-2xl p-2 transition-all duration-300 origin-top-left z-50 ${isAccountMenuOpen ? 'scale-100 opacity-100 translate-y-0' : 'scale-90 opacity-0 -translate-y-4 pointer-events-none'}`}>
+            <button 
+              onClick={() => { setIsLoginOpen(true); setIsAccountMenuOpen(false); }}
+              className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 rounded-2xl transition-all group"
+            >
+              <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 group-hover:bg-black group-hover:text-white transition-all">
+                <User size={16} />
+              </div>
+              <span className="text-sm font-bold">تسجيل الدخول</span>
+            </button>
+            <button className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 rounded-2xl transition-all group">
+              <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-500 group-hover:bg-blue-500 group-hover:text-white transition-all">
+                <Headphones size={16} />
+              </div>
+              <span className="text-sm font-bold">تحدث مباشر</span>
+            </button>
+            <button className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 rounded-2xl transition-all group">
+              <div className="w-8 h-8 rounded-full bg-amber-50 flex items-center justify-center text-amber-500 group-hover:bg-amber-500 group-hover:text-white transition-all">
+                <Sparkles size={16} />
+              </div>
+              <span className="text-sm font-bold">الترقية للمدفوع</span>
+            </button>
+          </div>
+        </div>
       </header>
 
       {/* Sidebar Overlay */}
@@ -193,15 +241,30 @@ const App: React.FC = () => {
       {/* Main Container */}
       <main className="flex-1 flex flex-col pt-4 relative">
         <div className="flex-1 overflow-y-auto custom-scrollbar px-4">
-          <div className="max-w-2xl mx-auto py-6">
-            {messages.map(msg => <MessageItem key={msg.id} message={msg} />)}
-            {isLoading && (
-              <div className="flex items-center gap-2 p-3 bg-gray-50 w-fit rounded-xl">
-                <div className="w-1.5 h-1.5 bg-gray-200 rounded-full animate-bounce" />
-                <div className="w-1.5 h-1.5 bg-gray-200 rounded-full animate-bounce [animation-delay:0.2s]" />
+          <div className="max-w-2xl mx-auto h-full flex flex-col">
+            {messages.length === 0 ? (
+              <div className="flex-1 flex flex-col items-center justify-center animate-in fade-in duration-1000">
+                <div className="relative h-20 w-full flex items-center justify-center overflow-hidden">
+                  <h2 
+                    key={phraseIndex}
+                    className="text-2xl md:text-3xl font-bold text-gray-400/80 animate-slide-up text-center px-4"
+                  >
+                    {phrases[phraseIndex]}
+                  </h2>
+                </div>
+              </div>
+            ) : (
+              <div className="py-6">
+                {messages.map(msg => <MessageItem key={msg.id} message={msg} />)}
+                {isLoading && (
+                  <div className="flex items-center gap-2 p-3 bg-gray-50 w-fit rounded-xl">
+                    <div className="w-1.5 h-1.5 bg-gray-200 rounded-full animate-bounce" />
+                    <div className="w-1.5 h-1.5 bg-gray-200 rounded-full animate-bounce [animation-delay:0.2s]" />
+                  </div>
+                )}
+                <div ref={messagesEndRef} className="h-32" />
               </div>
             )}
-            <div ref={messagesEndRef} className="h-32" />
           </div>
         </div>
 
