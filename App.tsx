@@ -27,7 +27,7 @@ import {
 import { Message, ModelType } from './types';
 import { generateAIResponse } from './geminiService';
 
-// --- المكونات الفرعية المصممة بدقة بالأبيض والأسود ---
+// --- المكونات الفرعية المصممة بدقة ---
 
 const SidebarAction: React.FC<{ 
   icon: React.ReactNode; 
@@ -53,25 +53,33 @@ const SidebarAction: React.FC<{
 const MessageItem: React.FC<{ message: Message; isDarkMode: boolean }> = ({ message, isDarkMode }) => {
   const isUser = message.role === 'user';
   return (
-    <div className={`flex w-full mb-10 animate-in fade-in slide-in-from-bottom-2 duration-500`}>
-      <div className={`flex max-w-[95%] md:max-w-[85%] items-start gap-4 ${isUser ? 'mr-auto flex-row-reverse' : 'ml-auto'}`}>
-        <div className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 shadow-sm transition-transform hover:scale-105 mt-1
+    <div className={`group flex w-full mb-12 animate-in fade-in slide-in-from-bottom-3 duration-700 ease-out`}>
+      <div className={`flex max-w-[98%] md:max-w-[90%] items-start gap-5 ${isUser ? 'mr-auto flex-row-reverse' : 'ml-auto'}`}>
+        {/* أفاتار أيقوني أنيق */}
+        <div className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 shadow-sm transition-all duration-300 group-hover:scale-105 mt-0.5
           ${isUser 
-            ? (isDarkMode ? 'bg-zinc-800 text-white' : 'bg-zinc-100 text-black') 
+            ? (isDarkMode ? 'bg-zinc-800 text-zinc-100' : 'bg-zinc-100 text-zinc-900') 
             : (isDarkMode ? 'bg-white text-black' : 'bg-black text-white')}`}>
-          {isUser ? <User size={16} strokeWidth={2.5} /> : <div className="font-black text-[12px]">G</div>}
+          {isUser ? <User size={18} strokeWidth={2} /> : <div className="font-black text-sm tracking-tighter">G</div>}
         </div>
-        <div className={`flex flex-col ${isUser ? 'items-end text-right' : 'items-start text-left'}`}>
-          <div className={`text-[15.5px] font-medium leading-[1.6] transition-colors py-1
+
+        {/* محتوى الرسالة - نص صافي بأبعاد مريحة */}
+        <div className={`flex flex-col ${isUser ? 'items-end' : 'items-start'}`}>
+          <div className={`text-[16px] leading-[1.8] font-medium whitespace-pre-wrap transition-colors
             ${isUser 
-              ? (isDarkMode ? 'text-zinc-200' : 'text-zinc-800') 
+              ? (isDarkMode ? 'text-zinc-300' : 'text-zinc-600') 
               : (isDarkMode ? 'text-zinc-100' : 'text-zinc-900')}`}>
             {message.content}
           </div>
-          {message.model && (
-            <span className="text-[10px] mt-2 font-bold tracking-tighter opacity-30 uppercase">
-              {message.model === ModelType.THINKER ? 'Thinker' : 'Fast'}
-            </span>
+          
+          {/* تذييل الرسالة (الموديل أو الوقت) بشكل شفاف جداً */}
+          {!isUser && message.model && (
+            <div className={`flex items-center gap-2 mt-3 opacity-20 group-hover:opacity-40 transition-opacity`}>
+              <div className={`w-1 h-1 rounded-full ${isDarkMode ? 'bg-white' : 'bg-black'}`}></div>
+              <span className="text-[9px] font-black uppercase tracking-[0.1em]">
+                {message.model === ModelType.THINKER ? 'Advanced Thinker' : 'Instant Flash'}
+              </span>
+            </div>
           )}
         </div>
       </div>
@@ -277,7 +285,7 @@ const App: React.FC = () => {
                 </div>
               </div>
             ) : (
-              <div className="py-10">
+              <div className="py-16">
                 {messages.map(msg => <MessageItem key={msg.id} message={msg} isDarkMode={isDarkMode} />)}
                 {isLoading && (
                   <div className="flex items-center gap-2 p-4 w-fit ml-auto">
