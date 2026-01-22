@@ -117,25 +117,20 @@ const App: React.FC = () => {
   return (
     <div className={`flex h-screen w-full overflow-hidden transition-colors duration-300 ${isDarkMode ? 'bg-black text-white' : 'bg-white text-gray-900'}`}>
       
-      {/* Header - Sidebar Right, Login Left */}
-      <header className="fixed top-0 left-0 right-0 h-14 flex items-center justify-between px-4 z-40 bg-white/50 backdrop-blur-md">
-        {/* اليمين (أول عنصر في RTL): أيقونة القائمة (3 شرط) */}
+      {/* Header - Transparent wrapper for icons only */}
+      <header className="fixed top-2 left-0 right-0 flex items-center justify-between px-4 z-40 pointer-events-none">
+        {/* اليمين: أيقونة القائمة (3 شرط) */}
         <button 
           onClick={() => setIsSidebarOpen(true)}
-          className="p-2.5 rounded-full hover:bg-gray-100 transition-all text-gray-500"
+          className="p-2.5 rounded-full hover:bg-gray-100 transition-all text-gray-500 pointer-events-auto"
         >
           <Menu size={22} strokeWidth={2} />
         </button>
 
-        {/* المنتصف: شعار Goyln الصغير */}
-        <div className="flex items-center gap-1.5 opacity-80 scale-90">
-          <span className="font-black text-sm tracking-tighter">GOYLN</span>
-        </div>
-
-        {/* اليسار (آخر عنصر في RTL): أيقونة تسجيل الدخول الشفافة */}
+        {/* اليسار: أيقونة تسجيل الدخول الشفافة */}
         <button 
           onClick={() => setIsLoginOpen(true)}
-          className="p-2.5 rounded-full hover:bg-gray-100/50 transition-all opacity-40 hover:opacity-100"
+          className="p-2.5 rounded-full hover:bg-gray-100/50 transition-all opacity-40 hover:opacity-100 pointer-events-auto"
         >
           <User size={20} strokeWidth={1.5} />
         </button>
@@ -196,7 +191,7 @@ const App: React.FC = () => {
       </div>
 
       {/* Main Container */}
-      <main className="flex-1 flex flex-col pt-14 relative">
+      <main className="flex-1 flex flex-col pt-4 relative">
         <div className="flex-1 overflow-y-auto custom-scrollbar px-4">
           <div className="max-w-2xl mx-auto py-6">
             {messages.map(msg => <MessageItem key={msg.id} message={msg} />)}
