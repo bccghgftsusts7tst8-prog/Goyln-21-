@@ -34,33 +34,42 @@ const SidebarAction: React.FC<{
   label: string; 
   onClick?: () => void;
   variant?: 'default' | 'danger';
-}> = ({ icon, label, onClick, variant = 'default' }) => (
+  isDarkMode: boolean;
+}> = ({ icon, label, onClick, variant = 'default', isDarkMode }) => (
   <button 
     onClick={onClick}
-    className={`w-full flex items-center gap-4 px-4 py-3 text-sm transition-all duration-200 rounded-xl group
-      ${variant === 'default' ? 'hover:bg-gray-50 text-gray-700' : 'hover:bg-red-50 text-red-600'}`}
+    className={`w-full flex items-center gap-4 px-4 py-3 text-sm transition-all duration-300 rounded-xl group
+      ${variant === 'default' 
+        ? (isDarkMode ? 'hover:bg-white/5 text-gray-300' : 'hover:bg-gray-50 text-gray-700') 
+        : 'hover:bg-red-500/10 text-red-500'}`}
   >
-    <span className={`${variant === 'default' ? 'text-gray-400 group-hover:text-black' : 'text-red-400'} transition-colors`}>
+    <span className={`${variant === 'default' ? 'text-gray-400 group-hover:text-blue-500' : 'text-red-400'} transition-colors`}>
       {icon}
     </span>
-    <span className="font-medium">{label}</span>
+    <span className="font-semibold">{label}</span>
   </button>
 );
 
-const MessageItem: React.FC<{ message: Message }> = ({ message }) => {
+const MessageItem: React.FC<{ message: Message; isDarkMode: boolean }> = ({ message, isDarkMode }) => {
   const isUser = message.role === 'user';
   return (
     <div className={`flex w-full mb-6 animate-in fade-in slide-in-from-bottom-1 duration-400`}>
       <div className={`flex max-w-[90%] md:max-w-[80%] items-start gap-3 ${isUser ? 'mr-auto flex-row-reverse' : 'ml-auto'}`}>
-        <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 shadow-sm
-          ${isUser ? 'bg-gray-100 text-gray-600' : 'bg-black text-white'}`}>
-          {isUser ? <User size={14} strokeWidth={2.5} /> : <div className="font-black text-[10px]">G</div>}
+        <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 shadow-lg transition-transform hover:scale-105
+          ${isUser 
+            ? (isDarkMode ? 'bg-indigo-600 text-white' : 'bg-indigo-50 text-indigo-600') 
+            : (isDarkMode ? 'bg-white text-black' : 'bg-black text-white')}`}>
+          {isUser ? <User size={14} strokeWidth={3} /> : <div className="font-black text-[10px]">G</div>}
         </div>
         <div className={`flex flex-col ${isUser ? 'items-end' : 'items-start'}`}>
-          <div className={`px-4 py-2.5 rounded-[20px] text-[14.5px] font-medium leading-relaxed border
+          <div className={`px-4 py-3 rounded-[22px] text-[14.5px] font-medium leading-relaxed border shadow-sm transition-colors
             ${isUser 
-              ? 'bg-white border-gray-100 text-gray-800 rounded-tr-none' 
-              : 'bg-gray-50 border-gray-50 text-gray-900 rounded-tl-none'}`}>
+              ? (isDarkMode 
+                  ? 'bg-zinc-800 border-zinc-700 text-zinc-100 rounded-tr-none' 
+                  : 'bg-white border-gray-100 text-gray-800 rounded-tr-none') 
+              : (isDarkMode 
+                  ? 'bg-zinc-900 border-zinc-800 text-zinc-200 rounded-tl-none' 
+                  : 'bg-gray-50 border-gray-100 text-gray-900 rounded-tl-none')}`}>
             {message.content}
           </div>
         </div>
@@ -136,100 +145,114 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className={`flex h-screen w-full overflow-hidden transition-colors duration-300 ${isDarkMode ? 'bg-black text-white' : 'bg-white text-gray-900'}`}>
+    <div className={`flex h-screen w-full overflow-hidden transition-all duration-500 ease-in-out ${isDarkMode ? 'bg-[#050505] text-white' : 'bg-white text-gray-900'}`}>
       
       {/* Header - Transparent wrapper for icons only */}
       <header className="fixed top-2 left-0 right-0 flex items-center justify-between px-4 z-40 pointer-events-none">
         {/* اليمين: أيقونة القائمة (3 شرط) */}
         <button 
           onClick={() => setIsSidebarOpen(true)}
-          className="p-2.5 rounded-full hover:bg-gray-100 transition-all text-gray-500 pointer-events-auto"
+          className={`p-2.5 rounded-full transition-all pointer-events-auto shadow-sm backdrop-blur-md border border-transparent
+            ${isDarkMode ? 'hover:bg-white/10 text-white/70 hover:text-white' : 'hover:bg-gray-100 text-gray-500 hover:text-black'}`}
         >
-          <Menu size={22} strokeWidth={2} />
+          <Menu size={22} strokeWidth={2.5} />
         </button>
 
         {/* اليسار: سهم يفتح قائمة الخيارات */}
         <div className="relative pointer-events-auto">
           <button 
             onClick={() => setIsAccountMenuOpen(!isAccountMenuOpen)}
-            className={`p-2.5 rounded-full hover:bg-gray-100/50 transition-all opacity-40 hover:opacity-100 ${isAccountMenuOpen ? 'rotate-180 opacity-100' : ''}`}
+            className={`p-2.5 rounded-full transition-all pointer-events-auto shadow-sm backdrop-blur-md border border-transparent
+              ${isDarkMode ? 'hover:bg-white/10 text-white/50 hover:text-white' : 'hover:bg-gray-100/50 text-gray-400 hover:text-black'}
+              ${isAccountMenuOpen ? 'rotate-180 !text-indigo-500 !opacity-100' : ''}`}
           >
-            <ArrowLeft size={20} strokeWidth={2} />
+            <ArrowLeft size={20} strokeWidth={2.5} />
           </button>
 
-          {/* القائمة المنسدلة من السهم - أيقونات فقط شفافة */}
-          <div className={`absolute top-full left-0 mt-2 flex flex-col gap-2 p-1 transition-all duration-300 origin-top-left z-50 ${isAccountMenuOpen ? 'scale-100 opacity-100 translate-y-0' : 'scale-90 opacity-0 -translate-y-4 pointer-events-none'}`}>
+          {/* القائمة المنسدلة من السهم - أيقونات فقط شفافة ومشبعة */}
+          <div className={`absolute top-full left-0 mt-3 flex flex-col gap-3 p-1 transition-all duration-300 origin-top-left z-50 ${isAccountMenuOpen ? 'scale-100 opacity-100 translate-y-0' : 'scale-90 opacity-0 -translate-y-4 pointer-events-none'}`}>
             <button 
               onClick={() => { setIsLoginOpen(true); setIsAccountMenuOpen(false); }}
-              className="w-10 h-10 flex items-center justify-center bg-white/40 backdrop-blur-md border border-white/20 rounded-full shadow-lg hover:bg-black hover:text-white transition-all group"
+              className={`w-11 h-11 flex items-center justify-center backdrop-blur-xl border rounded-full shadow-xl transition-all hover:scale-110 active:scale-90
+                ${isDarkMode ? 'bg-zinc-800/60 border-zinc-700/50 text-blue-400' : 'bg-white/60 border-white/20 text-blue-600'}`}
               title="تسجيل الدخول"
             >
-              <User size={18} />
+              <User size={20} strokeWidth={2.5} />
             </button>
             <button 
-              className="w-10 h-10 flex items-center justify-center bg-white/40 backdrop-blur-md border border-white/20 rounded-full shadow-lg hover:bg-blue-500 hover:text-white transition-all group"
+              className={`w-11 h-11 flex items-center justify-center backdrop-blur-xl border rounded-full shadow-xl transition-all hover:scale-110 active:scale-90
+                ${isDarkMode ? 'bg-zinc-800/60 border-zinc-700/50 text-emerald-400' : 'bg-white/60 border-white/20 text-emerald-600'}`}
               title="تحدث مباشر"
             >
-              <Headphones size={18} />
+              <Headphones size={20} strokeWidth={2.5} />
             </button>
             <button 
-              className="w-10 h-10 flex items-center justify-center bg-white/40 backdrop-blur-md border border-white/20 rounded-full shadow-lg hover:bg-amber-500 hover:text-white transition-all group"
+              className={`w-11 h-11 flex items-center justify-center backdrop-blur-xl border rounded-full shadow-xl transition-all hover:scale-110 active:scale-90
+                ${isDarkMode ? 'bg-zinc-800/60 border-zinc-700/50 text-amber-400' : 'bg-white/60 border-white/20 text-amber-600'}`}
               title="الترقية للمدفوع"
             >
-              <Sparkles size={18} />
+              <Sparkles size={20} strokeWidth={2.5} />
             </button>
           </div>
         </div>
       </header>
 
       {/* Sidebar Overlay */}
-      <div className={`fixed inset-0 z-50 transition-all duration-400 ${isSidebarOpen ? 'bg-black/5 visible opacity-100' : 'invisible opacity-0'}`} onClick={() => setIsSidebarOpen(false)}>
+      <div className={`fixed inset-0 z-50 transition-all duration-400 ${isSidebarOpen ? 'bg-black/40 visible opacity-100 backdrop-blur-sm' : 'invisible opacity-0'}`} onClick={() => setIsSidebarOpen(false)}>
         <aside 
           onClick={(e) => e.stopPropagation()}
-          className={`absolute top-0 right-0 w-72 h-full bg-white shadow-2xl transition-transform duration-400 transform ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'} flex flex-col`}
+          className={`absolute top-0 right-0 w-72 h-full shadow-2xl transition-transform duration-500 cubic-bezier(0.4, 0, 0.2, 1) transform 
+            ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'} flex flex-col
+            ${isDarkMode ? 'bg-zinc-900 border-l border-zinc-800' : 'bg-white'}`}
         >
           <div className="p-5">
-            <div className="flex items-center justify-between mb-6">
-              <span className="text-[10px] font-black uppercase tracking-widest text-gray-300">Goyln AI</span>
-              <button onClick={() => setIsSidebarOpen(false)} className="p-2 hover:bg-gray-50 rounded-lg text-gray-400 transition-all">
+            <div className="flex items-center justify-between mb-8">
+              <span className={`text-[11px] font-black uppercase tracking-[0.2em] ${isDarkMode ? 'text-zinc-600' : 'text-zinc-400'}`}>Goyln AI</span>
+              <button onClick={() => setIsSidebarOpen(false)} className={`p-2 rounded-xl transition-all ${isDarkMode ? 'hover:bg-white/5 text-zinc-500' : 'hover:bg-zinc-50 text-zinc-400'}`}>
                 <ChevronRight size={18} />
               </button>
             </div>
 
             <div className="relative group">
-              <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-300" size={16} />
+              <Search className={`absolute right-3 top-1/2 -translate-y-1/2 transition-colors ${isDarkMode ? 'text-zinc-600' : 'text-zinc-300'}`} size={16} />
               <input 
                 type="text" 
                 placeholder="البحث في السجل..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pr-10 pl-3 py-2.5 bg-gray-50 border-none rounded-xl text-xs focus:ring-1 focus:ring-black/5 outline-none"
+                className={`w-full pr-10 pl-3 py-3 rounded-xl text-xs font-medium focus:ring-2 outline-none transition-all
+                  ${isDarkMode 
+                    ? 'bg-zinc-800/50 text-white border-none focus:ring-indigo-500/30' 
+                    : 'bg-zinc-50 text-zinc-900 border-none focus:ring-black/5'}`}
               />
             </div>
           </div>
 
-          <nav className="flex-1 px-3 overflow-y-auto custom-scrollbar space-y-0.5">
-            <SidebarAction icon={<MessageSquare size={17} />} label="دردشة جديدة" onClick={() => { setMessages([]); setIsSidebarOpen(false); }} />
-            <SidebarAction icon={<UserPlus size={17} />} label="إضافة شخص للدردشة" />
-            <SidebarAction icon={<History size={17} />} label="سجل المحادثات" />
+          <nav className="flex-1 px-3 overflow-y-auto custom-scrollbar space-y-1">
+            <SidebarAction isDarkMode={isDarkMode} icon={<MessageSquare size={17} />} label="دردشة جديدة" onClick={() => { setMessages([]); setIsSidebarOpen(false); }} />
+            <SidebarAction isDarkMode={isDarkMode} icon={<UserPlus size={17} />} label="إضافة شخص للدردشة" />
+            <SidebarAction isDarkMode={isDarkMode} icon={<History size={17} />} label="سجل المحادثات" />
           </nav>
 
-          <div className="p-4 border-t border-gray-50">
+          <div className={`p-4 border-t ${isDarkMode ? 'border-zinc-800' : 'border-zinc-50'}`}>
             <SidebarAction 
-              icon={isDarkMode ? <Sun size={17} /> : <Moon size={17} />} 
+              isDarkMode={isDarkMode}
+              icon={isDarkMode ? <Sun size={17} className="text-amber-400" /> : <Moon size={17} className="text-indigo-600" />} 
               label={isDarkMode ? "الوضع النهاري" : "الوضع الليلي"} 
               onClick={() => setIsDarkMode(!isDarkMode)}
             />
-            <SidebarAction icon={<Shield size={17} />} label="الخصوصية والحقوق" />
-            <SidebarAction icon={<Mail size={17} />} label="اتصل بنا" />
+            <SidebarAction isDarkMode={isDarkMode} icon={<Shield size={17} />} label="الخصوصية والحقوق" />
+            <SidebarAction isDarkMode={isDarkMode} icon={<Mail size={17} />} label="اتصل بنا" />
             
-            <div className="mt-4 p-3 bg-gray-50 rounded-2xl flex items-center gap-3 cursor-pointer hover:bg-gray-100 transition-all">
-              <div className="w-8 h-8 rounded-lg bg-black flex items-center justify-center text-white">
-                <User size={16} />
+            <div className={`mt-4 p-4 rounded-[22px] flex items-center gap-3 cursor-pointer transition-all active:scale-95
+              ${isDarkMode ? 'bg-zinc-800 hover:bg-zinc-700' : 'bg-zinc-50 hover:bg-zinc-100'}`}>
+              <div className={`w-9 h-9 rounded-xl flex items-center justify-center shadow-lg
+                ${isDarkMode ? 'bg-indigo-600 text-white' : 'bg-black text-white'}`}>
+                <User size={18} strokeWidth={2.5} />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="font-bold text-[13px] truncate">زائر</p>
-                <p className="text-[9px] text-gray-400 truncate">سجل دخولك الآن</p>
+                <p className={`font-bold text-[13px] truncate ${isDarkMode ? 'text-zinc-100' : 'text-zinc-900'}`}>زائر</p>
+                <p className={`text-[10px] truncate ${isDarkMode ? 'text-zinc-500' : 'text-zinc-400'}`}>سجل دخولك الآن</p>
               </div>
             </div>
           </div>
@@ -242,10 +265,11 @@ const App: React.FC = () => {
           <div className="max-w-2xl mx-auto h-full flex flex-col">
             {messages.length === 0 ? (
               <div className="flex-1 flex flex-col items-center justify-center animate-in fade-in duration-1000">
-                <div className="relative h-20 w-full flex items-center justify-center overflow-hidden">
+                <div className="relative h-24 w-full flex items-center justify-center overflow-hidden">
                   <h2 
                     key={phraseIndex}
-                    className="text-2xl md:text-3xl font-bold text-gray-400/80 animate-slide-up text-center px-4"
+                    className={`text-2xl md:text-3xl font-bold transition-all duration-700 animate-slide-up text-center px-4 tracking-tight
+                      ${isDarkMode ? 'text-zinc-400' : 'text-zinc-400/80'}`}
                   >
                     {phrases[phraseIndex]}
                   </h2>
@@ -253,11 +277,13 @@ const App: React.FC = () => {
               </div>
             ) : (
               <div className="py-6">
-                {messages.map(msg => <MessageItem key={msg.id} message={msg} />)}
+                {messages.map(msg => <MessageItem key={msg.id} message={msg} isDarkMode={isDarkMode} />)}
                 {isLoading && (
-                  <div className="flex items-center gap-2 p-3 bg-gray-50 w-fit rounded-xl">
-                    <div className="w-1.5 h-1.5 bg-gray-200 rounded-full animate-bounce" />
-                    <div className="w-1.5 h-1.5 bg-gray-200 rounded-full animate-bounce [animation-delay:0.2s]" />
+                  <div className={`flex items-center gap-2 p-4 w-fit rounded-2xl shadow-sm border
+                    ${isDarkMode ? 'bg-zinc-900 border-zinc-800' : 'bg-gray-50 border-gray-100'}`}>
+                    <div className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce" />
+                    <div className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce [animation-delay:0.2s]" />
+                    <div className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce [animation-delay:0.4s]" />
                   </div>
                 )}
                 <div ref={messagesEndRef} className="h-32" />
@@ -266,18 +292,23 @@ const App: React.FC = () => {
           </div>
         </div>
 
-        {/* Floating Input Area - Shrunk (max-w-xl) */}
+        {/* Floating Input Area - Enhanced colors & transparency */}
         <div className="absolute bottom-6 left-0 right-0 px-4 pointer-events-none">
           <div className="max-w-xl mx-auto w-full pointer-events-auto">
-            <div className={`bg-white/80 backdrop-blur-xl border border-gray-100 shadow-[0_10px_30px_rgba(0,0,0,0.05)] rounded-[24px] p-1.5 flex items-center gap-1 transition-all focus-within:shadow-lg`}>
+            <div className={`backdrop-blur-2xl border shadow-[0_15px_40px_rgba(0,0,0,0.12)] rounded-[28px] p-2 flex items-center gap-1 transition-all focus-within:shadow-2xl focus-within:scale-[1.01]
+              ${isDarkMode 
+                ? 'bg-zinc-900/80 border-zinc-800 focus-within:border-zinc-700' 
+                : 'bg-white/80 border-gray-100 focus-within:border-gray-200'}`}>
               
-              <div className="flex items-center">
-                <label className="p-2.5 text-gray-300 hover:text-black transition-all cursor-pointer rounded-full hover:bg-gray-50 active:scale-90">
-                  <Plus size={18} />
+              <div className="flex items-center px-1">
+                <label className={`p-2.5 transition-all cursor-pointer rounded-full active:scale-90
+                  ${isDarkMode ? 'text-zinc-500 hover:text-white hover:bg-white/10' : 'text-gray-400 hover:text-black hover:bg-gray-50'}`}>
+                  <Plus size={20} strokeWidth={2.5} />
                   <input type="file" className="hidden" />
                 </label>
-                <button className="p-2.5 text-gray-300 hover:text-black transition-all rounded-full hover:bg-gray-50 active:scale-90">
-                  <Mic size={18} />
+                <button className={`p-2.5 transition-all rounded-full active:scale-90
+                  ${isDarkMode ? 'text-zinc-500 hover:text-white hover:bg-white/10' : 'text-gray-400 hover:text-black hover:bg-gray-50'}`}>
+                  <Mic size={20} strokeWidth={2.5} />
                 </button>
               </div>
 
@@ -289,34 +320,38 @@ const App: React.FC = () => {
                   if(e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); }
                 }}
                 placeholder="تحدث معي..."
-                className="flex-1 bg-transparent py-2 px-1 text-[14px] outline-none border-none resize-none overflow-hidden max-h-32"
+                className={`flex-1 bg-transparent py-3 px-2 text-[15px] font-medium outline-none border-none resize-none overflow-hidden max-h-32 
+                  ${isDarkMode ? 'text-zinc-100 placeholder-zinc-600' : 'text-zinc-900 placeholder-gray-400'}`}
               />
 
-              {/* Model Micro-Switcher - Smallest possible */}
-              <div className="flex items-center bg-gray-50/50 p-0.5 rounded-full border border-gray-100 mx-1">
+              {/* Model Micro-Switcher - Vibrant Saturation */}
+              <div className={`flex items-center p-1 rounded-full border mx-1
+                ${isDarkMode ? 'bg-zinc-800/50 border-zinc-700/50' : 'bg-gray-50/80 border-gray-100'}`}>
                 <button 
                   onClick={() => setModelType(ModelType.FAST)}
-                  className={`p-1.5 rounded-full transition-all ${modelType === ModelType.FAST ? 'bg-white shadow-xs text-black' : 'text-gray-300'}`}
+                  className={`p-1.5 rounded-full transition-all shadow-sm ${modelType === ModelType.FAST ? (isDarkMode ? 'bg-indigo-600 text-white' : 'bg-white text-indigo-600') : 'text-gray-400 hover:text-zinc-500'}`}
                   title="سريع"
                 >
-                  <Zap size={12} fill={modelType === ModelType.FAST ? "currentColor" : "none"} />
+                  <Zap size={14} fill={modelType === ModelType.FAST ? "currentColor" : "none"} />
                 </button>
                 <button 
                   onClick={() => setModelType(ModelType.THINKER)}
-                  className={`p-1.5 rounded-full transition-all ${modelType === ModelType.THINKER ? 'bg-white shadow-xs text-black' : 'text-gray-300'}`}
+                  className={`p-1.5 rounded-full transition-all shadow-sm ${modelType === ModelType.THINKER ? (isDarkMode ? 'bg-amber-600 text-white' : 'bg-white text-amber-600') : 'text-gray-400 hover:text-zinc-500'}`}
                   title="مفكر"
                 >
-                  <BrainCircuit size={12} />
+                  <BrainCircuit size={14} />
                 </button>
               </div>
 
               <button 
                 onClick={handleSend}
                 disabled={!input.trim() || isLoading}
-                className={`p-2.5 rounded-full transition-all flex items-center justify-center 
-                  ${input.trim() && !isLoading ? 'bg-black text-white active:scale-95' : 'bg-gray-50 text-gray-200'}`}
+                className={`p-3 rounded-full transition-all flex items-center justify-center shadow-md
+                  ${input.trim() && !isLoading 
+                    ? (isDarkMode ? 'bg-white text-black hover:bg-zinc-200 active:scale-95' : 'bg-black text-white hover:bg-zinc-800 active:scale-95') 
+                    : (isDarkMode ? 'bg-zinc-800 text-zinc-600' : 'bg-gray-100 text-gray-300')}`}
               >
-                <Send size={16} className="transform rotate-180" />
+                <Send size={18} strokeWidth={2.5} className="transform rotate-180" />
               </button>
             </div>
           </div>
@@ -325,20 +360,24 @@ const App: React.FC = () => {
 
       {/* Auth Modal */}
       {isLoginOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/10 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-[32px] w-full max-w-xs p-8 shadow-2xl relative overflow-hidden text-center">
-            <button onClick={() => setIsLoginOpen(false)} className="absolute top-6 left-6 text-gray-300 hover:text-black transition-colors">
-              <X size={18} />
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md p-4 animate-in fade-in duration-300">
+          <div className={`rounded-[36px] w-full max-w-sm p-10 shadow-[0_30px_60px_rgba(0,0,0,0.5)] relative overflow-hidden text-center border
+            ${isDarkMode ? 'bg-zinc-900 border-zinc-800' : 'bg-white border-gray-100'}`}>
+            <button onClick={() => setIsLoginOpen(false)} className={`absolute top-8 left-8 transition-colors ${isDarkMode ? 'text-zinc-600 hover:text-white' : 'text-zinc-300 hover:text-black'}`}>
+              <X size={20} strokeWidth={2.5} />
             </button>
-            <div className="w-12 h-12 bg-black text-white rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg font-black text-xl">G</div>
-            <h3 className="text-xl font-black mb-1 tracking-tight">تسجيل الدخول</h3>
-            <p className="text-gray-400 text-[12px] mb-6 leading-relaxed">انضم إلى Goyln AI</p>
+            <div className={`w-16 h-16 rounded-[22px] flex items-center justify-center mx-auto mb-6 shadow-2xl font-black text-3xl transition-transform hover:rotate-3
+              ${isDarkMode ? 'bg-white text-black' : 'bg-black text-white'}`}>G</div>
+            <h3 className={`text-2xl font-black mb-2 tracking-tight ${isDarkMode ? 'text-white' : 'text-zinc-900'}`}>تسجيل الدخول</h3>
+            <p className={`text-[13px] mb-8 font-medium leading-relaxed ${isDarkMode ? 'text-zinc-500' : 'text-zinc-400'}`}>استمتع بكامل مميزات Goyln AI</p>
             
-            <div className="space-y-2">
-              <button className="w-full py-3 px-4 border border-gray-100 rounded-xl flex items-center justify-center gap-3 font-bold text-xs hover:bg-gray-50 transition-all">
+            <div className="space-y-3">
+              <button className={`w-full py-4 px-6 border rounded-2xl flex items-center justify-center gap-3 font-bold text-sm transition-all hover:scale-[1.02] active:scale-95
+                ${isDarkMode ? 'bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700' : 'bg-white border-zinc-100 text-zinc-900 hover:bg-zinc-50'}`}>
                 المتابعة بواسطة جوجل
               </button>
-              <button className="w-full py-3 px-4 bg-black text-white rounded-xl font-bold text-xs hover:bg-gray-900 transition-all">
+              <button className={`w-full py-4 px-6 rounded-2xl font-bold text-sm transition-all hover:scale-[1.02] active:scale-95 shadow-lg
+                ${isDarkMode ? 'bg-white text-black hover:bg-zinc-200' : 'bg-black text-white hover:bg-zinc-800'}`}>
                 البريد الإلكتروني
               </button>
             </div>
