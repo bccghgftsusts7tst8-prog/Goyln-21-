@@ -1,0 +1,8 @@
+{
+  "name": "Goyln AI",
+  "description": "A clean, high-performance AI chat application by Goyln Company featuring multiple model integrations including Gemini and OpenAI-compatible structures.",
+  "requestFramePermissions": [
+    "microphone",
+    "camera"
+  ]
+}
