@@ -119,12 +119,12 @@ const App: React.FC = () => {
       
       {/* Header - Sidebar Right, Login Left */}
       <header className="fixed top-0 left-0 right-0 h-14 flex items-center justify-between px-4 z-40 bg-white/50 backdrop-blur-md">
-        {/* اليسار: أيقونة تسجيل الدخول الشفافة */}
+        {/* اليمين (أول عنصر في RTL): أيقونة القائمة (3 شرط) */}
         <button 
-          onClick={() => setIsLoginOpen(true)}
-          className="p-2.5 rounded-full hover:bg-gray-100/50 transition-all opacity-40 hover:opacity-100"
+          onClick={() => setIsSidebarOpen(true)}
+          className="p-2.5 rounded-full hover:bg-gray-100 transition-all text-gray-500"
         >
-          <User size={20} strokeWidth={1.5} />
+          <Menu size={22} strokeWidth={2} />
         </button>
 
         {/* المنتصف: شعار Goyln الصغير */}
@@ -132,12 +132,12 @@ const App: React.FC = () => {
           <span className="font-black text-sm tracking-tighter">GOYLN</span>
         </div>
 
-        {/* اليمين: أيقونة القائمة (3 شرط) */}
+        {/* اليسار (آخر عنصر في RTL): أيقونة تسجيل الدخول الشفافة */}
         <button 
-          onClick={() => setIsSidebarOpen(true)}
-          className="p-2.5 rounded-full hover:bg-gray-100 transition-all text-gray-500"
+          onClick={() => setIsLoginOpen(true)}
+          className="p-2.5 rounded-full hover:bg-gray-100/50 transition-all opacity-40 hover:opacity-100"
         >
-          <Menu size={22} strokeWidth={2} />
+          <User size={20} strokeWidth={1.5} />
         </button>
       </header>
 
