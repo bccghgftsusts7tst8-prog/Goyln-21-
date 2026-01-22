@@ -133,12 +133,13 @@ const App: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const recognitionRef = useRef<any>(null);
 
+  // تحديث العبارات لتكون أكثر إنسانية وبدون رموز تعبيرية حسب الطلب
   const phrases = [
-    "أنا هنا لأجلك.. كيف أجعلك تبتسم اليوم؟ 😊✨",
-    "Goyln AI: قلبٌ نابض في عالم الأرقام. 💎❤️",
-    "دعنا نبدع سوياً، فأنا أسمعك بكل جوارحي.. 🚀🌟",
-    "فخر Goyln أن أكون رفيقك الذكي والمخلص. 🤝⚡",
-    "ذكاء ينمو بمشاعرك، وسرعة تسبق خيالك.. 🔥"
+    "أنا هنا لأجلك.. كيف أجعلك تبتسم اليوم؟",
+    "Goyln AI: قلبٌ نابض في عالم الأرقام.",
+    "دعنا نبدع سوياً، فأنا أسمعك بكل جوارحي..",
+    "فخر Goyln أن أكون رفيقك الذكي والمخلص.",
+    "ذكاء ينمو بمشاعرك، وسرعة تسبق خيالك.."
   ];
 
   useEffect(() => {
@@ -311,12 +312,6 @@ const App: React.FC = () => {
                     {phrases[phraseIndex]}
                   </h2>
                 </div>
-                <div className="flex gap-4 mt-8">
-                   <div className={`w-3 h-3 rounded-full animate-pulse ${isDarkMode ? 'bg-zinc-800' : 'bg-zinc-100'}`}></div>
-                   <div className={`w-3 h-3 rounded-full animate-pulse [animation-delay:200ms] ${isDarkMode ? 'bg-zinc-800' : 'bg-zinc-100'}`}></div>
-                   <div className={`w-3 h-3 rounded-full animate-pulse [animation-delay:400ms] ${isDarkMode ? 'bg-zinc-800' : 'bg-zinc-100'}`}></div>
-                </div>
-                <p className={`text-[10px] font-black uppercase tracking-[0.6em] mt-12 opacity-50 ${isDarkMode ? 'text-white' : 'text-black'}`}>Innovation by Goyln Company</p>
               </div>
             ) : (
               <div className="py-24">
@@ -334,9 +329,9 @@ const App: React.FC = () => {
           </div>
         </div>
 
-        {/* Floating Input Area - Integrated Design */}
+        {/* Floating Input Area - Integrated Design - تصغير العرض حسب الطلب */}
         <div className="absolute bottom-10 left-0 right-0 px-6 pointer-events-none">
-          <div className="max-w-3xl mx-auto w-full pointer-events-auto relative">
+          <div className="max-w-xl mx-auto w-full pointer-events-auto relative">
             
             {/* File Previews */}
             {attachedFiles.length > 0 && (
