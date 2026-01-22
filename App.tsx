@@ -157,28 +157,26 @@ const App: React.FC = () => {
             <ArrowLeft size={20} strokeWidth={2} />
           </button>
 
-          {/* القائمة المنسدلة من السهم */}
-          <div className={`absolute top-full left-0 mt-2 w-56 bg-white/90 backdrop-blur-xl border border-gray-100 rounded-[24px] shadow-2xl p-2 transition-all duration-300 origin-top-left z-50 ${isAccountMenuOpen ? 'scale-100 opacity-100 translate-y-0' : 'scale-90 opacity-0 -translate-y-4 pointer-events-none'}`}>
+          {/* القائمة المنسدلة من السهم - أيقونات فقط شفافة */}
+          <div className={`absolute top-full left-0 mt-2 flex flex-col gap-2 p-1 transition-all duration-300 origin-top-left z-50 ${isAccountMenuOpen ? 'scale-100 opacity-100 translate-y-0' : 'scale-90 opacity-0 -translate-y-4 pointer-events-none'}`}>
             <button 
               onClick={() => { setIsLoginOpen(true); setIsAccountMenuOpen(false); }}
-              className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 rounded-2xl transition-all group"
+              className="w-10 h-10 flex items-center justify-center bg-white/40 backdrop-blur-md border border-white/20 rounded-full shadow-lg hover:bg-black hover:text-white transition-all group"
+              title="تسجيل الدخول"
             >
-              <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 group-hover:bg-black group-hover:text-white transition-all">
-                <User size={16} />
-              </div>
-              <span className="text-sm font-bold">تسجيل الدخول</span>
+              <User size={18} />
             </button>
-            <button className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 rounded-2xl transition-all group">
-              <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-500 group-hover:bg-blue-500 group-hover:text-white transition-all">
-                <Headphones size={16} />
-              </div>
-              <span className="text-sm font-bold">تحدث مباشر</span>
+            <button 
+              className="w-10 h-10 flex items-center justify-center bg-white/40 backdrop-blur-md border border-white/20 rounded-full shadow-lg hover:bg-blue-500 hover:text-white transition-all group"
+              title="تحدث مباشر"
+            >
+              <Headphones size={18} />
             </button>
-            <button className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 rounded-2xl transition-all group">
-              <div className="w-8 h-8 rounded-full bg-amber-50 flex items-center justify-center text-amber-500 group-hover:bg-amber-500 group-hover:text-white transition-all">
-                <Sparkles size={16} />
-              </div>
-              <span className="text-sm font-bold">الترقية للمدفوع</span>
+            <button 
+              className="w-10 h-10 flex items-center justify-center bg-white/40 backdrop-blur-md border border-white/20 rounded-full shadow-lg hover:bg-amber-500 hover:text-white transition-all group"
+              title="الترقية للمدفوع"
+            >
+              <Sparkles size={18} />
             </button>
           </div>
         </div>
