@@ -1,11 +1,10 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { 
   Menu, 
   User, 
   Send, 
   Mic, 
-  Plus, 
   Search, 
   Moon, 
   Sun, 
@@ -18,34 +17,28 @@ import {
   MessageSquare,
   History,
   ChevronRight,
-  ChevronLeft,
-  Settings,
-  Headphones,
-  Sparkles,
   ArrowLeft,
   ExternalLink,
   Globe,
   Cpu,
-  RefreshCcw,
   Image as ImageIcon,
-  Film,
   FileText,
   MapPin,
   MicOff,
-  Paperclip
+  Paperclip,
+  Sparkles
 } from 'lucide-react';
 import { Message, ModelType } from './types';
 import { generateAIResponse } from './geminiService';
 
+// تحسين معالجة المحتوى ليكون أسرع عبر استخدام Memoization داخلياً إذا لزم الأمر
 const formatContent = (content: string, isUser: boolean) => {
   if (isUser) return content;
 
-  // بسيط جداً: تمييز الأسطر التي تبدأ بـ # أو النصوص بين **
   const lines = content.split('\n');
   return lines.map((line, idx) => {
     let processedLine = line;
     
-    // معالجة النصوص العريضة **text**
     const boldRegex = /\*\*(.*?)\*\*/g;
     const parts = [];
     let lastIndex = 0;
@@ -77,13 +70,20 @@ const formatContent = (content: string, isUser: boolean) => {
   });
 };
 
-const SidebarAction: React.FC<{ 
+// استخدام React.memo لمنع إعادة رندرة عناصر القائمة الجانبية غير المتغيرة
+const SidebarAction = React.memo(({ 
+  icon, 
+  label, 
+  onClick, 
+  variant = 'default', 
+  isDarkMode 
+}: { 
   icon: React.ReactNode; 
   label: string; 
   onClick?: () => void;
   variant?: 'default' | 'danger';
   isDarkMode: boolean;
-}> = ({ icon, label, onClick, variant = 'default', isDarkMode }) => (
+}) => (
   <button 
     onClick={onClick}
     className={`w-full flex items-center gap-3 px-3 py-2 text-[13px] transition-all duration-300 rounded-xl group
@@ -96,13 +96,16 @@ const SidebarAction: React.FC<{
     </span>
     <span className="font-medium font-title">{label}</span>
   </button>
-);
+));
 
-const MessageItem: React.FC<{ message: Message; isDarkMode: boolean }> = ({ message, isDarkMode }) => {
+// استخدام React.memo للرسائل لضمان أداء عالي في المحادثات الطويلة
+const MessageItem = React.memo(({ message, isDarkMode }: { message: Message; isDarkMode: boolean }) => {
   const isUser = message.role === 'user';
-  const groundingLinks = (message as any).groundingChunks
-    ?.filter((chunk: any) => chunk.web?.uri || chunk.maps?.uri)
-    ?.map((chunk: any) => chunk.web || chunk.maps);
+  const groundingLinks = useMemo(() => 
+    (message as any).groundingChunks
+      ?.filter((chunk: any) => chunk.web?.uri || chunk.maps?.uri)
+      ?.map((chunk: any) => chunk.web || chunk.maps)
+  , [message]);
 
   return (
     <div className={`group flex w-full mb-10 animate-slide-up duration-700`}>
@@ -153,7 +156,7 @@ const MessageItem: React.FC<{ message: Message; isDarkMode: boolean }> = ({ mess
       </div>
     </div>
   );
-};
+});
 
 const App: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -161,7 +164,6 @@ const App: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
-  const [isAddMenuOpen, setIsAddMenuOpen] = useState(false);
   const [modelType, setModelType] = useState<ModelType>(ModelType.FAST);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -173,26 +175,27 @@ const App: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const recognitionRef = useRef<any>(null);
 
-  const phrases = [
+  const phrases = useMemo(() => [
     "أنا هنا لأجلك.. كيف أجعلك تبتسم اليوم؟",
     "Goyln AI: قلبٌ نابض في عالم الأرقام.",
     "دعنا نبدع سوياً، فأنا أسمعك بكل جوارحي..",
     "فخر Goyln أن أكون رفيقك الذكي والمخلص.",
     "ذكاء ينمو بمشاعرك، وسرعة تسبق خيالك.."
-  ];
+  ], []);
 
   useEffect(() => {
     const interval = setInterval(() => {
       setPhraseIndex((prev) => (prev + 1) % phrases.length);
     }, 5000);
     return () => clearInterval(interval);
-  }, []);
+  }, [phrases.length]);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isLoading]);
+    if (messages.length > 0) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages.length, isLoading]);
 
-  // Voice Input Setup
   useEffect(() => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (SpeechRecognition) {
@@ -209,7 +212,7 @@ const App: React.FC = () => {
     }
   }, []);
 
-  const toggleRecording = () => {
+  const toggleRecording = useCallback(() => {
     if (!recognitionRef.current) return;
     if (isRecording) {
       recognitionRef.current.stop();
@@ -217,9 +220,9 @@ const App: React.FC = () => {
       recognitionRef.current.start();
       setIsRecording(true);
     }
-  };
+  }, [isRecording]);
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
 
@@ -233,9 +236,9 @@ const App: React.FC = () => {
     }));
 
     setAttachedFiles(prev => [...prev, ...newFiles]);
-  };
+  }, []);
 
-  const handleSend = async () => {
+  const handleSend = useCallback(async () => {
     if ((!input.trim() && attachedFiles.length === 0) || isLoading) return;
     
     const userMsg: Message = { 
@@ -251,20 +254,19 @@ const App: React.FC = () => {
     setInput('');
     setAttachedFiles([]);
     setIsLoading(true);
-    setIsAddMenuOpen(false);
 
     try {
       let location: { latitude: number; longitude: number } | undefined;
       try {
         const pos = await new Promise<GeolocationPosition>((resolve, reject) => {
-          navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 5000 });
+          navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 3000 });
         });
         location = { latitude: pos.coords.latitude, longitude: pos.coords.longitude };
       } catch (e) {
-        console.warn("Location permission denied or timed out");
+        console.warn("Location not available");
       }
 
-      const history = messages.map(m => ({ role: m.role, content: m.content }));
+      const history = messages.slice(-10).map(m => ({ role: m.role, content: m.content }));
       const result = await generateAIResponse(currentInput, modelType, history, location, currentFiles);
       
       const assistantMsg: Message = { 
@@ -281,13 +283,18 @@ const App: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [input, attachedFiles, isLoading, messages, modelType]);
+
+  const toggleSidebar = useCallback(() => setIsSidebarOpen(prev => !prev), []);
+  const toggleDarkMode = useCallback(() => setIsDarkMode(prev => !prev), []);
+  const closeLogin = useCallback(() => setIsLoginOpen(false), []);
+  const openLogin = useCallback(() => { setIsLoginOpen(true); setIsAccountMenuOpen(false); }, []);
 
   return (
     <div className={`flex h-screen w-full overflow-hidden transition-all duration-700 ease-in-out ${isDarkMode ? 'bg-[#000000] text-white' : 'bg-white text-zinc-900'}`}>
       
       <header className="fixed top-4 left-0 right-0 flex items-center justify-between px-6 z-40 pointer-events-none">
-        <button onClick={() => setIsSidebarOpen(true)} className={`p-2 rounded-2xl transition-all pointer-events-auto shadow-sm glass-input border border-transparent ${isDarkMode ? 'hover:bg-white/10 text-white/40 hover:text-white' : 'hover:bg-zinc-100 text-zinc-400 hover:text-black'}`}>
+        <button onClick={toggleSidebar} className={`p-2 rounded-2xl transition-all pointer-events-auto shadow-sm glass-input border border-transparent ${isDarkMode ? 'hover:bg-white/10 text-white/40 hover:text-white' : 'hover:bg-zinc-100 text-zinc-400 hover:text-black'}`}>
           <Menu size={20} strokeWidth={2} />
         </button>
 
@@ -296,7 +303,7 @@ const App: React.FC = () => {
             <ArrowLeft size={18} strokeWidth={2.5} />
           </button>
           <div className={`absolute top-full left-0 mt-4 flex flex-col gap-3 p-1 transition-all duration-500 origin-top-left z-50 ${isAccountMenuOpen ? 'scale-100 opacity-100 translate-y-0' : 'scale-90 opacity-0 -translate-y-5 pointer-events-none'}`}>
-            <button onClick={() => { setIsLoginOpen(true); setIsAccountMenuOpen(false); }} className={`w-9 h-9 flex items-center justify-center glass-input border rounded-full shadow-2xl transition-all hover:scale-110 active:scale-95 ${isDarkMode ? 'bg-zinc-800/90 border-zinc-700/50 text-white' : 'bg-white/95 border-zinc-200 text-black'}`}>
+            <button onClick={openLogin} className={`w-9 h-9 flex items-center justify-center glass-input border rounded-full shadow-2xl transition-all hover:scale-110 active:scale-95 ${isDarkMode ? 'bg-zinc-800/90 border-zinc-700/50 text-white' : 'bg-white/95 border-zinc-200 text-black'}`}>
               <User size={16} strokeWidth={2} />
             </button>
             <button className={`w-9 h-9 flex items-center justify-center glass-input border rounded-full shadow-2xl transition-all hover:scale-110 active:scale-95 ${isDarkMode ? 'bg-zinc-800/90 border-zinc-700/50 text-white' : 'bg-white/95 border-zinc-200 text-black'}`}>
@@ -306,7 +313,6 @@ const App: React.FC = () => {
         </div>
       </header>
 
-      {/* Sidebar - ضبط المساحات بناءً على طلب المستخدم */}
       <div className={`fixed inset-0 z-50 transition-all duration-500 ${isSidebarOpen ? 'bg-black/60 visible opacity-100 backdrop-blur-md' : 'invisible opacity-0'}`} onClick={() => setIsSidebarOpen(false)}>
         <aside onClick={(e) => e.stopPropagation()} className={`absolute top-0 right-0 w-[280px] h-full shadow-2xl transition-transform duration-600 cubic-bezier(0.16, 1, 0.3, 1) transform ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'} flex flex-col ${isDarkMode ? 'bg-zinc-950 border-l border-zinc-900' : 'bg-white'}`}>
           <div className="pt-8 px-6 pb-4">
@@ -332,7 +338,7 @@ const App: React.FC = () => {
             
             <div className={`h-[1px] mx-3 my-3 ${isDarkMode ? 'bg-zinc-900' : 'bg-zinc-50'}`}></div>
             
-            <SidebarAction isDarkMode={isDarkMode} icon={isDarkMode ? <Sun /> : <Moon />} label={isDarkMode ? "الوضع النهاري" : "الوضع الليلي"} onClick={() => setIsDarkMode(!isDarkMode)} />
+            <SidebarAction isDarkMode={isDarkMode} icon={isDarkMode ? <Sun /> : <Moon />} label={isDarkMode ? "الوضع النهاري" : "الوضع الليلي"} onClick={toggleDarkMode} />
             <SidebarAction isDarkMode={isDarkMode} icon={<Shield />} label="ميثاق الخصوصية" />
             <SidebarAction isDarkMode={isDarkMode} icon={<Mail />} label="مركز Goyln للدعم" />
           </nav>
@@ -376,11 +382,8 @@ const App: React.FC = () => {
           </div>
         </div>
 
-        {/* Floating Input Area */}
         <div className="absolute bottom-10 left-0 right-0 px-4 pointer-events-none">
           <div className="max-w-lg mx-auto w-full pointer-events-auto relative">
-            
-            {/* File Previews */}
             {attachedFiles.length > 0 && (
               <div className="flex flex-wrap gap-2 mb-3 p-2 glass-input rounded-2xl border border-transparent animate-in slide-in-from-bottom-2">
                 {attachedFiles.map((file, i) => (
@@ -440,7 +443,7 @@ const App: React.FC = () => {
       {isLoginOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-2xl p-6 animate-in fade-in duration-700">
           <div className={`rounded-[40px] w-full max-sm:w-full max-w-sm p-12 shadow-[0_40px_100px_rgba(0,0,0,0.6)] relative overflow-hidden text-center border ${isDarkMode ? 'bg-zinc-950 border-zinc-800' : 'bg-white border-zinc-100'}`}>
-            <button onClick={() => setIsLoginOpen(false)} className={`absolute top-10 left-10 transition-colors ${isDarkMode ? 'text-zinc-800 hover:text-white' : 'text-zinc-300 hover:text-black'}`}>
+            <button onClick={closeLogin} className={`absolute top-10 left-10 transition-colors ${isDarkMode ? 'text-zinc-800 hover:text-white' : 'text-zinc-300 hover:text-black'}`}>
               <X size={24} strokeWidth={2.5} />
             </button>
             <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-10 shadow-2xl font-black text-3xl ${isDarkMode ? 'bg-white text-black' : 'bg-black text-white'}`}>G</div>
