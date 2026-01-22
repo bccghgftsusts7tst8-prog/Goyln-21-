@@ -53,25 +53,26 @@ const SidebarAction: React.FC<{
 const MessageItem: React.FC<{ message: Message; isDarkMode: boolean }> = ({ message, isDarkMode }) => {
   const isUser = message.role === 'user';
   return (
-    <div className={`flex w-full mb-6 animate-in fade-in slide-in-from-bottom-1 duration-400`}>
-      <div className={`flex max-w-[90%] md:max-w-[80%] items-start gap-3 ${isUser ? 'mr-auto flex-row-reverse' : 'ml-auto'}`}>
-        <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 shadow-sm transition-transform hover:scale-105
+    <div className={`flex w-full mb-10 animate-in fade-in slide-in-from-bottom-2 duration-500`}>
+      <div className={`flex max-w-[95%] md:max-w-[85%] items-start gap-4 ${isUser ? 'mr-auto flex-row-reverse' : 'ml-auto'}`}>
+        <div className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 shadow-sm transition-transform hover:scale-105 mt-1
           ${isUser 
-            ? (isDarkMode ? 'bg-zinc-700 text-white' : 'bg-zinc-100 text-black') 
+            ? (isDarkMode ? 'bg-zinc-800 text-white' : 'bg-zinc-100 text-black') 
             : (isDarkMode ? 'bg-white text-black' : 'bg-black text-white')}`}>
-          {isUser ? <User size={14} strokeWidth={3} /> : <div className="font-black text-[10px]">G</div>}
+          {isUser ? <User size={16} strokeWidth={2.5} /> : <div className="font-black text-[12px]">G</div>}
         </div>
-        <div className={`flex flex-col ${isUser ? 'items-end' : 'items-start'}`}>
-          <div className={`px-4 py-3 rounded-[22px] text-[14.5px] font-medium leading-relaxed border shadow-sm transition-colors
+        <div className={`flex flex-col ${isUser ? 'items-end text-right' : 'items-start text-left'}`}>
+          <div className={`text-[15.5px] font-medium leading-[1.6] transition-colors py-1
             ${isUser 
-              ? (isDarkMode 
-                  ? 'bg-zinc-800 border-zinc-700 text-zinc-100 rounded-tr-none' 
-                  : 'bg-white border-zinc-100 text-zinc-800 rounded-tr-none') 
-              : (isDarkMode 
-                  ? 'bg-zinc-900 border-zinc-800 text-zinc-200 rounded-tl-none' 
-                  : 'bg-zinc-50 border-zinc-100 text-zinc-900 rounded-tl-none')}`}>
+              ? (isDarkMode ? 'text-zinc-200' : 'text-zinc-800') 
+              : (isDarkMode ? 'text-zinc-100' : 'text-zinc-900')}`}>
             {message.content}
           </div>
+          {message.model && (
+            <span className="text-[10px] mt-2 font-bold tracking-tighter opacity-30 uppercase">
+              {message.model === ModelType.THINKER ? 'Thinker' : 'Fast'}
+            </span>
+          )}
         </div>
       </div>
     </div>
@@ -276,14 +277,13 @@ const App: React.FC = () => {
                 </div>
               </div>
             ) : (
-              <div className="py-6">
+              <div className="py-10">
                 {messages.map(msg => <MessageItem key={msg.id} message={msg} isDarkMode={isDarkMode} />)}
                 {isLoading && (
-                  <div className={`flex items-center gap-2 p-4 w-fit rounded-2xl shadow-sm border
-                    ${isDarkMode ? 'bg-zinc-900 border-zinc-800' : 'bg-zinc-50 border-zinc-100'}`}>
-                    <div className={`w-2 h-2 rounded-full animate-bounce ${isDarkMode ? 'bg-white' : 'bg-black'}`} />
-                    <div className={`w-2 h-2 rounded-full animate-bounce [animation-delay:0.2s] ${isDarkMode ? 'bg-white' : 'bg-black'}`} />
-                    <div className={`w-2 h-2 rounded-full animate-bounce [animation-delay:0.4s] ${isDarkMode ? 'bg-white' : 'bg-black'}`} />
+                  <div className="flex items-center gap-2 p-4 w-fit ml-auto">
+                    <div className={`w-1.5 h-1.5 rounded-full animate-bounce ${isDarkMode ? 'bg-white/40' : 'bg-black/20'}`} />
+                    <div className={`w-1.5 h-1.5 rounded-full animate-bounce [animation-delay:0.2s] ${isDarkMode ? 'bg-white/40' : 'bg-black/20'}`} />
+                    <div className={`w-1.5 h-1.5 rounded-full animate-bounce [animation-delay:0.4s] ${isDarkMode ? 'bg-white/40' : 'bg-black/20'}`} />
                   </div>
                 )}
                 <div ref={messagesEndRef} className="h-32" />
@@ -361,7 +361,7 @@ const App: React.FC = () => {
       {/* Auth Modal */}
       {isLoginOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md p-4 animate-in fade-in duration-300">
-          <div className={`rounded-[36px] w-full max-w-sm p-10 shadow-[0_30px_60px_rgba(0,0,0,0.5)] relative overflow-hidden text-center border
+          <div className={`rounded-[36px] w-full max-sm:w-[95%] max-w-sm p-10 shadow-[0_30px_60px_rgba(0,0,0,0.5)] relative overflow-hidden text-center border
             ${isDarkMode ? 'bg-zinc-900 border-zinc-800' : 'bg-white border-zinc-100'}`}>
             <button onClick={() => setIsLoginOpen(false)} className={`absolute top-8 left-8 transition-colors ${isDarkMode ? 'text-zinc-600 hover:text-white' : 'text-zinc-300 hover:text-black'}`}>
               <X size={20} strokeWidth={2.5} />
