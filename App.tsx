@@ -72,9 +72,9 @@ const MessageItem: React.FC<{ message: Message; isDarkMode: boolean }> = ({ mess
         </div>
 
         <div className={`flex flex-col ${isUser ? 'items-end text-right' : 'items-start text-left'} flex-1`}>
-          <div className={`text-[14.5px] leading-[1.7] whitespace-pre-wrap transition-all tracking-tight
+          <div className={`text-[15.5px] leading-[1.8] whitespace-pre-wrap transition-all tracking-normal
             ${isUser 
-              ? (isDarkMode ? 'text-zinc-400 font-normal' : 'text-zinc-500 font-normal') 
+              ? (isDarkMode ? 'text-zinc-400 font-medium' : 'text-zinc-500 font-medium') 
               : (isDarkMode ? 'text-zinc-100 font-semibold' : 'text-zinc-900 font-semibold')}`}>
             {message.content}
           </div>
@@ -126,18 +126,19 @@ const App: React.FC = () => {
   const [phraseIndex, setPhraseIndex] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // تحديث العبارات لتكون أكثر إنسانية وعاطفية
   const phrases = [
-    "كيف يمكن لـ Goyln مساعدتك؟ ✨",
-    "Goyln AI: ذكاء بلمسة إنسانية. 😊",
-    "فكر بعمق، استجب بسرعة. ⚡",
-    "Goyln Company: نبتكر للمستقبل. 🚀",
-    "كامل الفخر لـ Goyln في هذه الصناعة. 💎"
+    "أنا هنا لأجلك.. كيف أجعلك تبتسم اليوم؟ 😊✨",
+    "Goyln AI: قلبٌ نابض في عالم الأرقام. 💎❤️",
+    "دعنا نبدع سوياً، فأنا أسمعك بكل جوارحي.. 🚀🌟",
+    "فخر Goyln أن أكون رفيقك الذكي والمخلص. 🤝⚡",
+    "ذكاء ينمو بمشاعرك، وسرعة تسبق خيالك.. 🔥"
   ];
 
   useEffect(() => {
     const interval = setInterval(() => {
       setPhraseIndex((prev) => (prev + 1) % phrases.length);
-    }, 4000);
+    }, 4500);
     return () => clearInterval(interval);
   }, []);
 
